@@ -1,5 +1,6 @@
 # Larger LSTM Network to Generate Text for Alice in Wonderland
 import numpy
+import sys
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import Dropout
@@ -8,7 +9,7 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
 
 # load ascii text and covert to lowercase
-filename = "data\\boy_names.txt"
+filename = sys.argv[1]
 raw_text = open(filename).read()
 raw_text = raw_text.lower()
 
@@ -50,7 +51,7 @@ model.add(Dropout(0.2))
 model.add(LSTM(256))
 model.add(Dropout(0.2))
 model.add(Dense(y.shape[1], activation='softmax'))
-model.load_weights("models\\boy_weights.hdf5")
+# model.load_weights("models\\boy_weights.hdf5")
 model.compile(loss='categorical_crossentropy', optimizer='adam')
 
 # define the checkpoint
@@ -59,4 +60,4 @@ checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only
 callbacks_list = [checkpoint]
 
 # fit the model
-model.fit(X, y, epochs=15, batch_size=128, callbacks=callbacks_list)
+model.fit(X, y, epochs=1, batch_size=128, callbacks=callbacks_list)
