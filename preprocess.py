@@ -32,7 +32,7 @@ def religious_texts():
 		bible_text = bible.read()
 		bible.close()
 
-	bible_text = bible_text.replace("\n\n\n", "\n").replace("\n\n\n\n", "\n").replace("\n\n\n\n\n", "\n")
+	bible_text = bible_text.replace("\n\n\n\n", "\n")
 
 	with open("data\\bible_edit.txt", "w+") as bible:
 		bible.write(bible_text)
