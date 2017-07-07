@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+import re
 
 # Preprocess the boy names
 def boy_names():
@@ -32,8 +33,9 @@ def religious_texts():
 		bible_text = bible.read()
 		bible.close()
 
-	bible_text = bible_text.replace("\n\n\n\n", "\n")
-
+	bible_text = bible_text.replace("\n\n\n\n", "\n").replace("\n\n\n", "\n")
+	bible_text = re.sub(r'\d+', '', bible_text)
+	bible_text = re.sub(r':+', '', bible_text)
 	with open("data\\bible_edit.txt", "w+") as bible:
 		bible.write(bible_text)
 
