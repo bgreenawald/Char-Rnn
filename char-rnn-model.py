@@ -24,7 +24,7 @@ print("Total Characters: ", n_chars)
 print("Total Vocab: ", n_vocab)
 
 # prepare the dataset of input to output pairs encoded as integers
-seq_length = 100
+seq_length = 15
 dataX = []
 dataY = []
 for i in range(0, n_chars - seq_length, 1):
@@ -60,4 +60,4 @@ checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only
 callbacks_list = [checkpoint]
 
 # fit the model
-model.fit(X, y, epochs=50, batch_size=64, callbacks=callbacks_list)
+model.fit(X, y, nb_epoch=25, batch_size=512, callbacks=callbacks_list)
