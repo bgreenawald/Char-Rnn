@@ -1,15 +1,19 @@
 # Larger LSTM Network to Generate Text for Alice in Wonderland
 import numpy
 import sys
+import os
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import Dropout
 from keras.layers import LSTM
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.utils import np_utils
 
-# load ascii text and covert to lowercase
+# Read in command line arguments
 filename = sys.argv[1]
+epochs = int(sys.argv[2])
+
+# load ascii text and covert to lowercase
 raw_text = open(filename).read()
 raw_text = raw_text.lower()
 
@@ -47,17 +51,21 @@ y = np_utils.to_categorical(dataY)
 # define the LSTM model
 model = Sequential()
 model.add(LSTM(256, input_shape=(X.shape[1], X.shape[2]), return_sequences=True))
-model.add(Dropout(0.2))
+model.add(Dropout(0.3))
 model.add(LSTM(256))
-model.add(Dropout(0.2))
+model.add(Dropout(0.3))
 model.add(Dense(y.shape[1], activation='softmax'))
 # model.load_weights("models\\boy_weights.hdf5")
 model.compile(loss='categorical_crossentropy', optimizer='adam')
 
 # define the checkpoint
-filepath="weights-improvement-{epoch:02d}-{loss:.4f}-bigger.hdf5"
+filepath=os.path.join(os.getcwd(), "models", \
+	 os.path.split(filename)[1][:-4] + ".hdf5")
 checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
-callbacks_list = [checkpoint]
+checkpoint2 = EarlyStopping(monitor='loss', min_delta=0, patience=2, verbose=0, mode='auto')
+
+callbacks_list = [checkpoint, checkpoint2]
 
 # fit the model
-model.fit(X, y, nb_epoch=25, batch_size=512, callbacks=callbacks_list)
+model.fit(X, y, epochs=epochs, batch_size=256, \
+	callbacks=callbacks_list, shuffle=True)
