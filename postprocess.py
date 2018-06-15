@@ -3,6 +3,15 @@ import string
 from tqdm import tqdm
 import os
 
+from difflib import SequenceMatcher
+
+
+# Similarity calculator between 2 strings
+# From https://stackoverflow.com/questions/17388213/find-the-similarity-metric-between-two-strings/17388505
+
+def similar(a, b):
+    return SequenceMatcher(None, a, b).ratio()
+
 # Get only the unique names from the generated set
 def uniqueNames(filename, original_file):
 
@@ -53,37 +62,48 @@ def lcs(X , Y):
 def name_similarity(write_name, unique_names, original_names):
 
 	# Create dict
-	name_similarity = {}
+	lcs_similarity = {}
+	seq_similarity = {}
 	name_subset = {}
 	for name in unique_names:
-		name_similarity[name] = ""
+		lcs_similarity[name] = ""
+		seq_similarity[name] = ""
 		name_subset[name] = []
 
 	# Run the LCS algorithm to find the most common name
 	print("Calculating similarity: ")
 	for index, name in tqdm(enumerate(unique_names)):
+		max_lcs = 0
+		max_lcs_val = ""
 		max_sim = 0
-		max_val = ""
+		max_sim_val = ""
 		for name2 in original_names:
-			sim = lcs(name, name2)
+			sim_lcs = lcs(name, name2)
+			sim = similar(name, name2)
+			if sim_lcs > max_lcs:
+				max_lcs = sim_lcs
+				max_lcs_val = name2
 			if sim > max_sim:
 				max_sim = sim
-				max_val = name2
+				max_sim_val = name2
 			if name in name2 or name2 in name:
 				name_subset[name].append(name2)
 
-		name_similarity[name] = max_val
+		lcs_similarity[name] = max_lcs_val
+		seq_similarity[name] = max_sim_val
 
 	# Write the results
 	with open(write_name, "w+") as write_file:
 		write_file.write("For each of the original names, this files finds\n" +
-			"the most similiar counterpart in the new names dataset using the LCS algorithm and\n" +
+			"the most similiar counterpart in the new names dataset using the LCS algorithm,\n" +
+			"a sequence similarity algorithm, and\n" +
 			"finding any new names such that the new name is a subset of the original name or\n" +
 			"the original name is a subset of the new name.")
-		write_file.write("Original Name: New Name, [Subset Names]\n")
-		for elem in name_similarity:
+		write_file.write("Original Name: New Name (LCS), New Name (Sequence Similarity), [Subset Names]\n")
+		for elem in lcs_similarity:
 			write_file.write(string.capwords(elem) + ": " \
-				+ string.capwords(name_similarity[elem]) + ', [' \
+				+ string.capwords(lcs_similarity[elem]) + ", "
+				+ string.capwords(seq_similarity[elem]) + ', [' \
 				+ ', '.join([string.capwords(s) for s in name_subset[elem]]) + "]\n")
 
 

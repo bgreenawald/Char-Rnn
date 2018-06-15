@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 import requests
 import re
+import pandas as pd
+import string
 
 # Preprocess the boy names
 def boy_names():
@@ -39,8 +41,74 @@ def religious_texts():
 	with open("data\\bible_edit.txt", "w+") as bible:
 		bible.write(bible_text)
 
+def band_names():
+	# Get the weird band names
+	page = requests.get("http://brightlightsfilm.com/weirdbandnames/#.Wx1OFUgvxPY")
+	soup = BeautifulSoup(page.text, 'html.parser')
+
+	# Extract out the band names
+	all_names = []
+	names = soup.find_all(class_="bandname")
+	# remove_bad_chars = re.compile("[^a-zA-Z ]")
+	remove_multiple_spaces = re.compile("[\n ]+")
+
+	# Iterate over the names
+	for name in names:
+
+		name_find = name.find('a')
+		if name_find:
+			name = name_find.contents[0].strip()
+		else:
+			name = name.contents[0].strip()
+		name = remove_multiple_spaces.sub(' ', name.lower())
+		name = remove_multiple_spaces.sub(' ', name.lower())
+		all_names.append(name)
+
+	# Read in the names from Wikipedia
+	page = requests.get("https://en.wikipedia.org/wiki/List_of_band_name_etymologies")
+	soup = BeautifulSoup(page.text, 'html.parser')
+
+	# Extract out the band names
+	for elem in soup.find_all("b"):
+		elem = elem.find('a')
+		if elem:
+			elem = elem.contents[0]
+			if elem != "^":
+				elem = remove_multiple_spaces.sub(' ', elem.strip())
+				elem = remove_multiple_spaces.sub(' ', elem.strip())
+				all_names.append(elem.lower())
+
+
+	# Read in the pitchfork data
+	pitchfork = pd.read_csv("data/bands.csv")
+	for x in list(pitchfork.iloc[:,2]):
+		all_names.append(x)
+
+	"""
+	# Remove non-printible characters from all names and remove duplicates
+	printable = set(string.printable)
+	for i, s in enumerate(all_names):
+		try:
+			all_names[i] = s.filter(lambda x: x in printable)
+		except:
+			print(s)
+	"""
+
+	# Write the results to a file
+	ret = ""
+	for band in set(all_names):
+		try:
+			ret += band.encode("ascii", errors="ignore").decode() + "\n"
+		except:
+			print(band)
+
+	with open("data/band_names.txt", 'w+') as file:
+		file.write(ret)
+		file.close()
+
+
 def main():
-	religious_texts()
+	band_names()
 
 if __name__=="__main__":
 	main()

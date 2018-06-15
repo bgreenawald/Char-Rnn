@@ -12,6 +12,9 @@ from tqdm import tqdm
 
 # load ascii text and covert to lowercase
 filename = sys.argv[1]
+hidden = int(sys.argv[2])
+nodes = int(sys.argv[3])
+
 raw_text = open(filename).read()
 raw_text = raw_text.lower()
 
@@ -49,8 +52,13 @@ y = np_utils.to_categorical(dataY)
 
 # define the LSTM model
 model = Sequential()
-model.add(LSTM(256, input_shape=(X.shape[1], X.shape[2]), return_sequences=True))
-model.add(LSTM(256))
+model.add(LSTM(nodes, input_shape=(X.shape[1], X.shape[2]), return_sequences=True))
+
+for _ in range(hidden - 2):
+	model.add(LSTM(nodes, return_sequences=True))
+
+if hidden > 1:
+	model.add(LSTM(nodes))
 model.add(Dense(y.shape[1], activation='softmax'))
 
 # load the network weights
