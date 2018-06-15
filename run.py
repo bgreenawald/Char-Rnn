@@ -10,7 +10,7 @@ def main():
             help="name of the data file")
     ap.add_argument("-e", "--epochs", required=False, default=10,
             help="number of epochs for the hidden layer")
-    ap.add_argument("-hi", "--hidden", required=False, default=3,
+    ap.add_argument("-hi", "--hidden", required=False, default=2,
             help="number of hidden layers")
     ap.add_argument("-d", "--dropout", required=False, default=0.3,
             help="dropout")

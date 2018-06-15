@@ -107,8 +107,26 @@ def band_names():
 		file.close()
 
 
+def pornstar_names():
+	page = requests.get("http://www.pornolaba.com/pornstars.html")
+	soup = BeautifulSoup(page.content, 'html.parser')
+
+	all_names = []
+	remove_digits = re.compile("[0-9]+")
+	for elem in soup.find_all("li"):
+		e = elem.find("a")
+		if e:
+			e = re.sub(remove_digits, '', e.contents[0])
+			e = e.strip().lower()
+			all_names.append(e)
+
+	with open("data/pornstar_names.txt", "w+") as file:
+		print(len(all_names))
+		file.write('\n'.join(all_names))
+		file.close()
+
 def main():
-	band_names()
+	pornstar_names()
 
 if __name__=="__main__":
 	main()
